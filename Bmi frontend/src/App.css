@@ -1,0 +1,47 @@
+/* App.css */
+
+/* Global styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Header styles */
+.header {
+  background-color: #007bff; /* Primary color */
+  color: #fff; /* Text color */
+  padding: 20px;
+  text-align: center;
+}
+
+.header-title {
+  font-size: 2rem;
+  margin: 0;
+}
+
+/* Main content styles */
+.main-content {
+  padding: 20px;
+}
+
+/* Container styles */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Disclaimer styles */
+.disclaimer {
+  background-color: #f8f9fa; /* Light gray */
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Footer styles */
+.footer {
+  background-color: #007bff; /* Primary color */
+  color: #fff; /* Text color */
+  text-align: center;
+  padding: 10px 0;
+}
