@@ -47,32 +47,77 @@ const BMISchema = new mongoose.Schema({
 // Define model for "bmidata" collection
 const BMIModel = mongoose.model('bmidata', BMISchema);
 
+// Allowed origins
+const allowedOrigins = [
+    'https://body-mass-index-cal-aabc.vercel.app',
+    'http://localhost:3000' // For local development
+];
+
+// CORS configuration
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error stack:', err.stack);
+    res.status(500).json({
+        error: 'Internal Server Error',
+        message: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});
+
 // API endpoint to save BMI data
-app.post('/api/bmi', async (req, res) => {
+app.post('/api/bmi', async (req, res, next) => {
     try {
+        console.log('Received request with body:', req.body);
+        
         const { weight, height, bmi, bmiCategory } = req.body;
+
+        // Validate required fields
+        if (weight === undefined || height === undefined || bmi === undefined || !bmiCategory) {
+            return res.status(400).json({
+                error: 'Missing required fields',
+                required: ['weight', 'height', 'bmi', 'bmiCategory'],
+                received: { weight, height, bmi, bmiCategory }
+            });
+        }
 
         // Create a new BMI document
         const newBMI = new BMIModel({
-            weight,
-            height,
-            bmi,
-            bmiCategory
+            weight: parseFloat(weight),
+            height: parseFloat(height),
+            bmi: parseFloat(bmi),
+            bmiCategory: String(bmiCategory)
         });
 
         // Save the new BMI document to the database
-        await newBMI.save();
+        const savedBMI = await newBMI.save();
+        console.log('BMI data saved:', savedBMI);
 
         // Respond with success message
-        res.status(201).json({ message: 'BMI data saved successfully' });
+        res.status(201).json({ 
+            success: true,
+            message: 'BMI data saved successfully',
+            data: savedBMI
+        });
     } catch (error) {
-        // Handle errors and respond with error message
-        console.error('Error saving BMI data:', error);
-        res.status(500).json({ error: 'Failed to save BMI data' });
+        // Pass error to error handling middleware
+        next(error);
     }
 });
 

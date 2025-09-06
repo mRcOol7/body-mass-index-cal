@@ -7,10 +7,42 @@ import axios from 'axios';
 function App() {
     const handleSaveBMI = async (data) => {
         try {
-            const response = await axios.post('http://localhost:3000/api/bmi', data); // Updated URL
-            console.log('BMI data saved successfully:', response.data);
+            console.log('Sending BMI data:', data);
+            const response = await axios.post('https://body-mass-index-cal-aabc.vercel.app/api/bmi', data, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                validateStatus: (status) => status < 500 // Reject only if status is 500 or higher
+            });
+            
+            if (response.data && response.data.success) {
+                console.log('BMI data saved successfully:', response.data);
+                return { success: true, data: response.data.data };
+            } else {
+                console.error('Failed to save BMI data:', response.data);
+                return { 
+                    success: false, 
+                    error: response.data?.error || 'Failed to save BMI data',
+                    details: response.data
+                };
+            }
         } catch (error) {
-            console.error('Error saving BMI data:', error);
+            console.error('Error saving BMI data:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                config: {
+                    url: error.config?.url,
+                    method: error.config?.method,
+                    data: error.config?.data
+                }
+            });
+            
+            return {
+                success: false,
+                error: error.response?.data?.message || error.message || 'Failed to connect to the server',
+                details: error.response?.data || error
+            };
         }
     };
 
