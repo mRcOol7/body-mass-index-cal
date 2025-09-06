@@ -9,9 +9,32 @@ const app = express();
 const PORT = process.env.PORT || 3000; // Update port to 3000
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('Error connecting to MongoDB:', err));
+console.log('Attempting to connect to MongoDB...');
+
+mongoose.connect(process.env.MONGODB_URI);
+
+const db = mongoose.connection;
+
+db.on('error', (error) => {
+    console.error('MongoDB connection error:', error);
+});
+
+db.once('open', () => {
+    console.log('Successfully connected to MongoDB Atlas');
+    console.log('Database name:', db.name);
+    console.log('Host:', db.host);
+    console.log('Port:', db.port);
+});
+
+db.on('disconnected', () => {
+    console.log('MongoDB disconnected');
+});
+
+process.on('SIGINT', async () => {
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed due to app termination');
+    process.exit(0);
+});
 
 // Define BMI schema
 const BMISchema = new mongoose.Schema({
