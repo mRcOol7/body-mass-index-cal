@@ -8,7 +8,7 @@ function App() {
     const handleSaveBMI = async (data) => {
         try {
             console.log('Sending BMI data:', data);
-            const response = await axios.post('https://body-mass-index-cal-aabc.vercel.app/api/bmi', data, {
+            const response = await axios.post('https://body-mass-index-cal.vercel.app/api/bmi', data, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
